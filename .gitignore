@@ -215,3 +215,4 @@ cython_debug/
 
 # Repo list - only keep test one for example
 !repo-list/test-repos.txt
+repo-list/*
