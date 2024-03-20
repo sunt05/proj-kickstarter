@@ -1,4 +1,4 @@
-# GitHub Project Repo Opener
+# ProjectKickstart
 
 This is a repo with snippets I've used for quickly setting up research project repos on GitHub for my students.
 
