@@ -54,20 +54,20 @@ template_file=$2
 # Get the H2 headers
 IFS=$'\n' issues=($(grep -E '^## ' $template_file | sed 's/^## //'))
 
-# # Print the issues
-# counter=1
-# for issue in "${issues[@]}"; do
-#     echo "$counter. $issue"
-#     ((counter++))
-# done
-# echo "======================"
-# echo ""
+# Print the issues
+counter=1
+for issue in "${issues[@]}"; do
+    echo "$counter. $issue"
+    ((counter++))
+done
+echo "======================"
+echo ""
 
 # Get the line numbers of the H2 headers
 issue_line_numbers=($(grep -n -E '^## ' $template_file | cut -d: -f1))
 
 # Print the line numbers
-echo "Issue line numbers: ${issue_line_numbers[@]}"
+# echo "Issue line numbers: ${issue_line_numbers[@]}"
 
 # Get the line numbers of the last line of the file
 last_line_number=$(wc -l <$template_file)
@@ -108,18 +108,41 @@ done
 repo_list_file=$1
 
 # read the repositories from the file
-repos=($(cat $repo_list_file))
+# each line contains repo and username separated by comma
+# retrieve repo name and username to separate variables
+
+IFS=$'\n' repos=($(awk -F, '{print $1}' $repo_list_file))
+usernames=($(awk -F, '{print $2}' $repo_list_file))
+# trim the repos and usernames: both leading and trailing spaces
+repos=("${repos[@]// /}")
+usernames=("${usernames[@]// /}")
+
+
+# Print the repositories
+for i in {1..${#repos[@]}}; do
+    echo "Repository $i:_${repos[$i]}"
+    echo "Username:_${usernames[$i]}"
+    echo "----------------------"
+done
+# for repo in "${repos[@]}"; do
+#     echo "$repo"
+# done
+
 
 # iterate over the repositories and raise issues
-for repo in "${repos[@]}"; do
+for i_repo in {1..${#repos[@]}}; do
+    # get the repo and username
+    repo=${repos[$i_repo]}
+    username=${usernames[$i_repo]}
     echo "Raising issues in $repo"
+    echo "for user $username"
     echo "----------------------"
     # iterate over the issues and raise them
-    for i in {1..${#issue_bodies[@]}}; do
-        issue_title=${issues[$i]}
-        issue_body=${issue_bodies[$i]}
-        echo "Raising issue $i: $issue_title"
-        gh issue create --title "$issue_title" --body "$issue_body" --repo $repo
+    for i_issue in {1..${#issue_bodies[@]}}; do
+        issue_title=${issues[$i_issue]}
+        issue_body=${issue_bodies[$i_issue]}
+        echo "Raising issue $i_issue: $issue_title"
+        gh issue create --title "$issue_title" --body "$issue_body" --repo $repo --assignee "$username"
         echo "Done"
         echo "----------------------"
     done
