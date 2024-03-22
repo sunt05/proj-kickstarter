@@ -1,4 +1,7 @@
+# GitHub Starter
 
+The tasks listed below are designed to help you get started with GitHub, a powerful platform for collaboration and project management.
+By completing these tasks, you will learn how to navigate GitHub repositories, create and manage issues, and organise your research tasks using GitHub Projects.
 
 ## Explore and Understand Your GitHub Repository
 
