@@ -1,2 +1,4 @@
 UrbanClimateRisk-UCL/test-5, sunt05
 UrbanClimateRisk-UCL/test-6, sunt05
+UrbanClimateRisk-UCL/test-7, sunt05
+UrbanClimateRisk-UCL/test-8, sunt05

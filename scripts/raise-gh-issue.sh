@@ -10,8 +10,8 @@
 # repos.txt: file containing list of repositories to raise issues in' (one repository per line)
 #  example:
 #  ```
-#  user/repo1
-#  user/repo2
+#  user/repo1, username1
+#  user/repo2, username2
 #  ```
 
 # template-file: markdown file containing issue template

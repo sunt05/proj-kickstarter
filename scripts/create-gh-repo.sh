@@ -48,7 +48,8 @@ while IFS= read -r repo; do
     username=$(echo "${repo_array[2]}" | tr -d ' ')
     echo "Creating repository $repo_name for user $username"
     gh repo create $repo_name --template $repo_template --private
-    echo "/repos/$owner/$repo/collaborators/$username"
+    echo "Repository $repo_name created successfully"
+
 
     # permission can be one of the following: pull, push, maintain, triage, admin
     echo '{}' | gh api \
@@ -59,5 +60,8 @@ while IFS= read -r repo; do
         -f permission='maintain' \
         --silent
 
-    echo "Repository $repo_name created successfully"
+    echo "User $username added as collaborator"
+
+    echo "---"
+    echo ""
 done <$repo_list_file
