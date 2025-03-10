@@ -37,31 +37,67 @@ fi
 # read the repo list file
 repo_list_file=$1
 
+# Print header
+echo "\n📦 Starting repository creation process..."
+echo "==========================================\n"
+
 # create the repositories and add student as collaborator
-while IFS= read -r repo; do
+while IFS= read -r repo || [ -n "$repo" ]; do
+    # Skip empty lines
+    if [[ -z "${repo// }" ]]; then
+        continue
+    fi
+
     # split the repo and username using zsh way
     repo_array=("${(@s/,/)repo}")
     repo_name=${repo_array[1]}
 
+    # Validate input format
+    if [[ ! "$repo_name" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+        echo "⚠️  Invalid repository format: $repo_name - skipping"
+        continue
+    fi
+
     # Split repo_name into owner and repo
     IFS="/" read -r owner repo <<< "$repo_name"
     username=$(echo "${repo_array[2]}" | tr -d ' ')
-    echo "Creating repository $repo_name for user $username"
-    gh repo create $repo_name --template $repo_template --private
-    echo "Repository $repo_name created successfully"
 
+    # Validate username
+    if [[ -z "$username" ]]; then
+        echo "⚠️  Missing username for repository $repo_name - skipping"
+        continue
+    fi
 
-    # permission can be one of the following: pull, push, maintain, triage, admin
-    echo '{}' | gh api \
-        --method PUT \
-        -H "Accept: application/vnd.github+json" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-       /repos/"$owner"/"$repo"/collaborators/"$username" \
-        -f permission='maintain' \
-        --silent
+    echo "🔍 Processing: $repo_name"
+    echo "   └── User: $username"
 
-    echo "User $username added as collaborator"
+    # Check if repository exists
+    if gh repo view "$repo_name" &>/dev/null; then
+        echo "   └── ⏩ Repository already exists, skipping creation"
+    else
+        echo "   └── 🔨 Creating new repository..."
+        if gh repo create $repo_name --template $repo_template --private; then
+            echo "   └── ✅ Repository created successfully"
 
-    echo "---"
-    echo ""
+            # permission can be one of the following: pull, push, maintain, triage, admin
+            if echo '{}' | gh api \
+                --method PUT \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                /repos/"$owner"/"$repo"/collaborators/"$username" \
+                -f permission='maintain' \
+                --silent; then
+                echo "   └── 👥 User $username added as collaborator"
+            else
+                echo "   └── ❌ Failed to add collaborator"
+            fi
+        else
+            echo "   └── ❌ Failed to create repository"
+        fi
+    fi
+
+    echo "-------------------"
 done <$repo_list_file
+
+echo "\n✨ Repository creation process completed"
+echo "======================================\n"
